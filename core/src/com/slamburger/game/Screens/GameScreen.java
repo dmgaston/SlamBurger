@@ -37,6 +37,10 @@ public class GameScreen implements Screen {
         game.batch.begin();
         game.batch.draw(img, 0, 0);
         game.batch.end();
+        if (Gdx.input.isTouched()) {
+            /*Some game logic here.
+            * if tapped, user claims burger, screen cleared, points updated*/
+        }
     }
 
     @Override
