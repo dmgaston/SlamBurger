@@ -12,6 +12,7 @@ public class Player {
 
     }
 
+
     public boolean hasBuns(){
         if(buns != 0){
             return true;
@@ -19,7 +20,13 @@ public class Player {
         return false;
     }
     public void useBun(){
-        if(hasBuns()) buns -= 1;
+         buns -= 1;
+    }
+    public void addPoints(int points){
+        this.points += points;
+    }
+    public int getPoints(){
+        return points;
     }
 
 }
