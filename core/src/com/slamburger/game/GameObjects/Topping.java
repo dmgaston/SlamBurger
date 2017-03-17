@@ -10,12 +10,12 @@ import com.badlogic.gdx.graphics.Texture;
 public class Topping {
 
     final private boolean isBad;
-    final private String imageLocation;
+    final private String imageFileName;
     Texture texture;
-    public Topping(boolean isBad, String imageLocation){
+    public Topping(boolean isBad, String imageFileName){
         this.isBad = isBad;
-        this.imageLocation = imageLocation;
-        texture = new Texture(Gdx.files.internal(imageLocation));
+        this.imageFileName = imageFileName;
+        texture = new Texture(Gdx.files.internal(imageFileName));
 
     }
     public Texture getTexture(){

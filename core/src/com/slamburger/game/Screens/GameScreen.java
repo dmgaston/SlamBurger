@@ -5,8 +5,10 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.slamburger.game.GameObjects.Deck;
 import com.slamburger.game.GameObjects.Player;
 import com.slamburger.game.GameObjects.Topping;
 import com.slamburger.game.SlamburgerGame;
@@ -20,14 +22,19 @@ public class GameScreen implements Screen {
     Texture toppingImg;
     Texture bottomBun;
     OrthographicCamera camera;
+    OrthographicCamera backgroundCam;
     ArrayList<Topping> toppings;
-    int top;
+
     long lastToppingTime;
     int foodGathered;
     int burgerSize;
     int zoomVal;
     Player player;
     FitViewport fitViewPort;
+    FitViewport backgroundFVP;
+    Texture bkgrdTexture;
+    Deck deck;
+
 
     public GameScreen(SlamburgerGame game){
 
@@ -35,24 +42,31 @@ public class GameScreen implements Screen {
         toppingImg = new Texture(Gdx.files.internal("tomato.png"));
         bottomBun = new Texture(Gdx.files.internal("bottom.png"));
 
-        top = 50;
 
 
+        bkgrdTexture = new Texture(Gdx.files.internal("background.png"));
 
+        deck = new Deck(5, 3);
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
         camera.position.set(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, 0);
         camera.update();
+        backgroundCam = new OrthographicCamera();
+        backgroundCam.setToOrtho(false, 800, 480);
+        backgroundCam.position.set(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, 0);
+        backgroundCam.update();
 
         fitViewPort = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
+        backgroundFVP = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), backgroundCam);
 
 
 
-        // create the raindrops array and spawn the first raindrop
+
         toppings = new ArrayList<Topping>();
         spawnTopping();
         burgerSize = 0;
         player = new Player();
+
 
     }
 
@@ -65,44 +79,49 @@ public class GameScreen implements Screen {
     public void render(float delta) {
 
 
-        // clear the screen with a dark blue color. The
-        // arguments to glClearColor are the red, green
-        // blue and alpha component in the range [0,1]
-        // of the color to be used to clear the screen.
+
         Gdx.gl.glClearColor(135/255f, 206/255f, 235/255f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         // tell the camera to update its matrices.
         camera.update();
+        backgroundCam.update();
 
         // tell the SpriteBatch to render in the
         // coordinate system specified by the camera.
+        game.batch.setProjectionMatrix(backgroundCam.combined);
+        game.batch.begin();
+
+        game.batch.draw(bkgrdTexture,camera.position.x - (bkgrdTexture.getWidth()/2), camera.position.y - (bkgrdTexture.getHeight()/2));
+        game.batch.end();
         game.batch.setProjectionMatrix(camera.combined);
 
-        // begin a new batch and draw the bucket and
-        // all drops
+
+        //background.draw(game.batch);
+
         game.batch.begin();
 
         game.batch.draw(bottomBun,camera.position.x - (bottomBun.getWidth()/2), camera.position.y - (bottomBun.getHeight()/2));
         for (Topping topping : toppings) {
             game.batch.draw(topping.getTexture(), camera.position.x - (toppingImg.getWidth()/2), camera.position.y - (toppingImg.getHeight()/2));
         }
+
+
         game.batch.end();
         handleInput();
 
-        // check if we need to create a new raindrop
+
         if (TimeUtils.nanoTime()/1000000000 - lastToppingTime > 1)
 
             spawnTopping();
 
-        // move the raindrops, remove any that are beneath the bottom edge of
-        // the screen or that hit the bucket. In the later case we increase the
-        // value our drops counter and add a sound effect.
-        //Iterator<Rectangle> iter = toppings.iterator();
+
     }
 
     @Override
     public void resize(int width, int height) {
+        backgroundFVP.update(width, height, true);
+        backgroundCam.update();
         fitViewPort.update(width, height, true);
         camera.update();
 
@@ -110,26 +129,13 @@ public class GameScreen implements Screen {
 
     private void spawnTopping() {
 
-        Topping tp = new Topping(false, "tomato.png");
-        Random rand = new Random();
-        int nextTopping = rand.nextInt(4);
-        switch (nextTopping){
-            case 0:
-                tp = new Topping(false, "tomato.png");
-                break;
-            case 1:
-                tp = new Topping(false, "lettuce.png");
-                break;
-            case 2:
-                tp = new Topping(false, "pickle.png");
-                break;
-            case 3:
-                tp = new Topping(true, "biohazard.png");
-                break;
-        }
-        toppings.add(tp);
+
+        if(deck.hasCard())
+        toppings.add(deck.deal());
         burgerSize++;
         lastToppingTime = TimeUtils.nanoTime()/1000000000;
+        backgroundCam.zoom += 2f;
+
 
     }
     public void handleInput(){
@@ -159,8 +165,6 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
         toppingImg.dispose();
-       // bucketImage.dispose();
-        //dropSound.dispose();
-        //rainMusic.dispose();
+
     }
 }
