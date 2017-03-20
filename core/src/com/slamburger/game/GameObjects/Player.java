@@ -28,5 +28,8 @@ public class Player {
     public int getPoints(){
         return points;
     }
+    public int bunLeft(){
+        return buns;
+    }
 
 }

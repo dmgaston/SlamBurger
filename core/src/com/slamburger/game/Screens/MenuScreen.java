@@ -44,17 +44,21 @@ public class MenuScreen implements Screen {
         bmf.getData().setScale(5f,5f);
         game.batch.begin();
         //game.batch.draw(img, camera.position.x - (img.getWidth()/2), camera.position.y - (img.getHeight()/2));
-        bmf.draw(game.batch, "MAIN MENU", 200, 400);
+        bmf.draw(game.batch, "MAIN MENU", 100, 100);
 
-        game.batch.end();
+
 
         if (Gdx.input.justTouched()) {
             //if(Gdx.input.getX() <100 && Gdx.input.getY() <100){
+            bmf.draw(game.batch, "STARTING...", 100, 100);
                 game.setScreen(new GameScreen(game));
                 dispose();
            // }
 
+
+
         }
+        game.batch.end();
     }
 
     @Override

@@ -5,8 +5,10 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.slamburger.game.GameObjects.Deck;
 import com.slamburger.game.GameObjects.Player;
@@ -28,12 +30,17 @@ public class GameScreen implements Screen {
     long lastToppingTime;
     int foodGathered;
     int burgerSize;
-    int zoomVal;
+
+    Topping top;
+    BitmapFont bmf;
+
     Player player;
     FitViewport fitViewPort;
     FitViewport backgroundFVP;
     Texture bkgrdTexture;
     Deck deck;
+    int backgroundIndex = 0;
+    String[] backgrounds = {"atoms.png", "bloodcells.png", "waterdrops.png", "basketballs.png", "earth.png", "sun.png", "supernova.png", "milkyway.png"};
 
 
     public GameScreen(SlamburgerGame game){
@@ -44,9 +51,8 @@ public class GameScreen implements Screen {
 
 
 
-        bkgrdTexture = new Texture(Gdx.files.internal("background.png"));
 
-        deck = new Deck(5, 3);
+        deck = new Deck(50, 13);
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
         camera.position.set(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, 0);
@@ -66,6 +72,11 @@ public class GameScreen implements Screen {
         spawnTopping();
         burgerSize = 0;
         player = new Player();
+        bmf = new BitmapFont();
+        bmf.getData().setScale(5f,5f);
+
+
+
 
 
     }
@@ -91,9 +102,10 @@ public class GameScreen implements Screen {
         // coordinate system specified by the camera.
         game.batch.setProjectionMatrix(backgroundCam.combined);
         game.batch.begin();
-
+        bkgrdTexture = new Texture(Gdx.files.internal(backgrounds[backgroundIndex]));
         game.batch.draw(bkgrdTexture,camera.position.x - (bkgrdTexture.getWidth()/2), camera.position.y - (bkgrdTexture.getHeight()/2));
         game.batch.end();
+
         game.batch.setProjectionMatrix(camera.combined);
 
 
@@ -102,11 +114,28 @@ public class GameScreen implements Screen {
         game.batch.begin();
 
         game.batch.draw(bottomBun,camera.position.x - (bottomBun.getWidth()/2), camera.position.y - (bottomBun.getHeight()/2));
+
         for (Topping topping : toppings) {
             game.batch.draw(topping.getTexture(), camera.position.x - (toppingImg.getWidth()/2), camera.position.y - (toppingImg.getHeight()/2));
+            top = topping;
+
         }
 
+       /* if (top.isToppingBad()){
+            float delay = 1; // seconds
 
+            Timer.schedule(new Timer.Task(){
+                @Override
+                public void run() {
+                    toppings.clear();
+                }
+            }, delay);
+        }*/
+
+
+        bmf.draw(game.batch, "SCORE: "+ player.getPoints(), 50  , 100);
+        bmf.draw(game.batch, "CARDS LEFT: "+ deck.cardsInDeck(), 50  , 170);
+        bmf.draw(game.batch, "BUNS LEFT: "+ player.bunLeft(), 50  , Gdx.graphics.getHeight()-50);
         game.batch.end();
         handleInput();
 
@@ -114,6 +143,18 @@ public class GameScreen implements Screen {
         if (TimeUtils.nanoTime()/1000000000 - lastToppingTime > 1)
 
             spawnTopping();
+        if(!player.hasBuns() || !deck.hasCard()) {
+            float delay = 1; // seconds
+
+            Timer.schedule(new Timer.Task(){
+                @Override
+                public void run() {
+                    game.setScreen(new MenuScreen(game));
+                }
+            }, delay);
+
+        }
+
 
 
     }
@@ -129,20 +170,38 @@ public class GameScreen implements Screen {
 
     private void spawnTopping() {
 
+    if(top == null || !top.isToppingBad()) {
+        if (deck.hasCard()) {
+            toppings.add(deck.deal());
+            burgerSize++;
+            lastToppingTime = TimeUtils.nanoTime() / 1000000000;
+            backgroundIndex++;
 
-        if(deck.hasCard())
-        toppings.add(deck.deal());
-        burgerSize++;
-        lastToppingTime = TimeUtils.nanoTime()/1000000000;
-        backgroundCam.zoom += 2f;
+
+        }
+    }else{
+        toppings.clear();
+        top = null;
+        burgerSize = 0;
+        backgroundIndex = 0;
+    }
+
+
 
 
     }
     public void handleInput(){
-        if(Gdx.input.justTouched()){
-            foodGathered += burgerSize;
+        if(Gdx.input.justTouched() && !top.isToppingBad() && player.hasBuns()){
+
+            player.addPoints(burgerSize);
             toppings.clear();
             burgerSize = 0;
+            backgroundIndex = 0;
+            top = null;
+            player.useBun();
+
+
+
 
         }
     }

@@ -58,7 +58,7 @@ public class Deck {
                         topping = new Topping(false, "lettuce.png");
                         break;
                     case 1:
-                        topping = new Topping(false, "biohazard.png");
+                        topping = new Topping(true, "biohazard.png");
                         break;
                     case 2:
                         topping = new Topping(false, "pickle.png");
@@ -97,6 +97,9 @@ public class Deck {
     public boolean hasCard(){
         if(dealIndex < size) return true;
         return false;
+    }
+    public int cardsInDeck(){
+        return size - dealIndex+1;
     }
 
 }
