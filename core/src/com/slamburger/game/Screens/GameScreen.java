@@ -13,6 +13,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -35,6 +36,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.slamburger.game.GameObjects.Deck;
 import com.slamburger.game.GameObjects.Player;
+import com.slamburger.game.GameObjects.PreferencesLoader;
 import com.slamburger.game.GameObjects.Topping;
 import com.slamburger.game.SlamburgerGame;
 
@@ -47,11 +49,10 @@ public class GameScreen implements Screen {
     Deck deck;
     Sprite sprite;
     Texture img;
-    World world;
-    Body body;
     BitmapFont bmf;
     Player player;
     ShapeRenderer shapeRenderer;
+    PreferencesLoader preferencesLoader;
 
     long lastDropTime;
     int burgerSize;
@@ -81,26 +82,13 @@ public class GameScreen implements Screen {
         player = new Player();
         burgerSize = 0;
         topping = new Topping(false, "monkey.png");
-        /*try{
-            Scanner scanner = new Scanner(new File("highscore.txt"));
-            highScore = scanner.nextInt();
-            scanner.close();
-        }catch(FileNotFoundException e){
-            e.printStackTrace();
-        }*/
+        preferencesLoader = new PreferencesLoader();
+        highScore = preferencesLoader.getHighScore();
 
 
     }
 
-    private void spawnRaindrop() {
-       /* Rectangle raindrop = new Rectangle();
-        raindrop.x = MathUtils.random(0, 800 - 64);
-        raindrop.y = 480;
-        raindrop.width = 64;
-        raindrop.height = 64;
-        raindrops.add(raindrop);*/
-        lastDropTime = TimeUtils.nanoTime();
-    }
+
 
     @Override
     public void render(float delta) {
@@ -148,13 +136,9 @@ public class GameScreen implements Screen {
         }
         if(!deck.hasCard() || !player.hasBuns()){
            float delay = 1; // seconds
-            /*try{
-                Writer wr = new FileWriter("highscore.txt");
-                wr.write(Integer.toString(highScore));
-                wr.close();
-            }catch(IOException e){
-                e.printStackTrace();
-            }*/
+           if(player.getPoints()> highScore){
+                preferencesLoader.setHighScore(player.getPoints());
+           }
 
             Timer.schedule(new Timer.Task(){
                 @Override
@@ -175,9 +159,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-        // start the playback of the background music
-        // when the screen is shown
-        //rainMusic.play();
+
     }
 
     @Override

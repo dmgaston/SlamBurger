@@ -2,11 +2,15 @@ package com.slamburger.game.Screens;
 
 import com.badlogic.gdx.Gdx;
 
+import com.badlogic.gdx.Preferences;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.slamburger.game.GameObjects.PreferencesLoader;
 import com.slamburger.game.SlamburgerGame;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
@@ -20,25 +24,25 @@ import java.util.Scanner;
 
 public class MenuScreen implements Screen {
     final SlamburgerGame game;
-    OrthographicCamera camera;
-    Texture img;
-    FitViewport fitViewPort;
+
+
+
     BitmapFont bmf;
-    int highScore = 0;
+    int highScore;
+    PreferencesLoader preferencesLoader;
+    Texture background;
+
     public MenuScreen(SlamburgerGame game){
-        img = new Texture("tomato.png");
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 480);
-        fitViewPort = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
+
+
         bmf = new BitmapFont();
+        bmf.setColor(Color.BLACK);
+        bmf.getData().setScale(5f,5f);
         this.game = game;
-        /*try{
-            Scanner scanner = new Scanner(new File("highscore.txt"));
-            highScore = scanner.nextInt();
-            scanner.close();
-        }catch(FileNotFoundException e){
-            e.printStackTrace();
-        }*/
+        background = new Texture(Gdx.files.internal("chimp.png"));
+        preferencesLoader = new PreferencesLoader();
+        highScore = preferencesLoader.getHighScore();
+
 
 
     }
@@ -52,14 +56,14 @@ public class MenuScreen implements Screen {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        camera.update();
-        game.batch.setProjectionMatrix(camera.combined);
 
-        bmf.getData().setScale(5f,5f);
+
+
+
         game.batch.begin();
-
-         bmf.draw(game.batch, "TAP TO START", Gdx.graphics.getWidth()+50, Gdx.graphics.getHeight()/2);
-         bmf.draw(game.batch, "HIGHSCORE: "+highScore, Gdx.graphics.getWidth()+50, Gdx.graphics.getHeight()/2-50);
+        game.batch.draw(background, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+         bmf.draw(game.batch, "TAP TO START", 100, Gdx.graphics.getHeight()/2);
+         bmf.draw(game.batch, "HIGHSCORE: "+highScore, 100, Gdx.graphics.getHeight()/2-70);
 
 
 
@@ -78,8 +82,7 @@ public class MenuScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        fitViewPort.update(width, height, true);
-        camera.update();
+
     }
 
     @Override

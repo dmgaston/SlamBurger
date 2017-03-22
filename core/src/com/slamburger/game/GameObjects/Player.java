@@ -1,5 +1,12 @@
 package com.slamburger.game.GameObjects;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
+
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+
 /**
  * Created by 123 on 3/13/2017.
  */
@@ -26,10 +33,12 @@ public class Player {
         this.points += points;
     }
     public int getPoints(){
+
         return points;
     }
     public int bunLeft(){
         return buns;
     }
+
 
 }
