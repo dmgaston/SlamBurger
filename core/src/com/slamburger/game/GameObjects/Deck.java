@@ -7,20 +7,21 @@ public class Deck {
 
 
     int size;
-    int badCardsInDeck;
+    int percentBad;
     public Topping cards[];
     int dealIndex = 0;
     int badCardPicker;
-    int goodCardPicker;
+    int cardPicker;
     int swapIndex;
     Topping topping;
-    public Deck(int size, int badCardsInDeck){
+    Random rand;
+    public Deck(int size, int percentBad){
         this.size = size;
-        this.badCardsInDeck = badCardsInDeck;
+        this.percentBad = percentBad;
         cards = new Topping[size];
-        topping = new Topping(false, "monkey.png");
-        Random rand = new Random();
-       //cards[0] = topping;
+        topping = new Topping(true, "monkey.png");
+        rand = new Random();
+        //cards[0] = topping;
         /*for(int i = 0; i < size-1; i++){
             topping = new Topping(false, "tomato.png");
             cards[i] = topping;
@@ -50,10 +51,10 @@ public class Deck {
             cards[i] = topping;
 
         }*/
-        for (int j =0; j < size; j ++){
+        /*for (int j =0; j < size; j ++){
 
-                goodCardPicker = rand.nextInt(4);
-                switch(goodCardPicker){
+                cardPicker = rand.nextInt(4);
+                switch(cardPicker){
                     case 0:
                         topping = new Topping(false, "lettuce.png");
                         break;
@@ -74,25 +75,66 @@ public class Deck {
 
 
         }
-        shuffle();
+        shuffle();*/
 
 
     }
 
 
-    public void shuffle(){
-        Random rand = new Random();
-        Topping temp;
-        for(int i = 0; i < size; i++){
-            temp=cards[i];
-            swapIndex = rand.nextInt(size);
-            cards[i] = cards[swapIndex];
-            cards[swapIndex] = temp;
-        }
-    }
+    /* public void shuffle(){
+
+         Topping temp;
+         for(int i = 0; i < size; i++){
+             temp=cards[i];
+             swapIndex = rand.nextInt(size);
+             cards[i] = cards[swapIndex];
+             cards[swapIndex] = temp;
+         }
+     }*/
     public Topping deal(){
 
-        return cards[dealIndex++];
+        int randNum = rand.nextInt(100)+1;
+        if(randNum < percentBad){
+            cardPicker = rand.nextInt(4)+1;
+            switch(cardPicker){
+                case 0:
+                    topping = new Topping(true, "spider.png");
+                    break;
+                case 1:
+                    topping = new Topping(true, "biohazard.png");
+                    break;
+                case 2:
+                    topping = new Topping(true, "radioactive.png");
+                    break;
+                case 3:
+                    topping = new Topping(true, "skull.png");
+                    break;
+                case 4:
+                    topping = new Topping(true, "monkey.png");
+                    break;
+            }
+        }else{
+            cardPicker = rand.nextInt(4)+1;
+            switch(cardPicker){
+                case 0:
+                    topping = new Topping(false, "lettuce.png");
+                    break;
+                case 1:
+                    topping = new Topping(false, "sausage.png");
+                    break;
+                case 2:
+                    topping = new Topping(false, "pickle.png");
+                    break;
+                case 3:
+                    topping = new Topping(false, "egg.png");
+                    break;
+                case 4:
+                    topping = new Topping(false, "tomato.png");
+                    break;
+            }
+        }
+
+        return topping;
     }
     public boolean hasCard(){
         if(dealIndex < size) return true;

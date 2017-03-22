@@ -1,89 +1,105 @@
 package com.slamburger.game.Screens;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Iterator;
+import java.util.Scanner;
+
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Fixture;
+import com.badlogic.gdx.physics.box2d.FixtureDef;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.Timer;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.slamburger.game.GameObjects.Deck;
 import com.slamburger.game.GameObjects.Player;
 import com.slamburger.game.GameObjects.Topping;
 import com.slamburger.game.SlamburgerGame;
 
-import java.util.ArrayList;
-import java.util.Random;
-
-
 public class GameScreen implements Screen {
     final SlamburgerGame game;
-    Texture toppingImg;
-    Texture bottomBun;
-    OrthographicCamera camera;
-    OrthographicCamera backgroundCam;
-    ArrayList<Topping> toppings;
 
-    long lastToppingTime;
-    int foodGathered;
+
+
+
+    Deck deck;
+    Sprite sprite;
+    Texture img;
+    World world;
+    Body body;
+    BitmapFont bmf;
+    Player player;
+    ShapeRenderer shapeRenderer;
+
+    long lastDropTime;
     int burgerSize;
 
-    Topping top;
-    BitmapFont bmf;
+    Topping topping;
+    int highScore;
 
-    Player player;
-    FitViewport fitViewPort;
-    FitViewport backgroundFVP;
-    Texture bkgrdTexture;
-    Deck deck;
-    int backgroundIndex = 0;
-    String[] backgrounds = {"atoms.png", "bloodcells.png", "waterdrops.png", "basketballs.png", "earth.png", "sun.png", "supernova.png", "milkyway.png"};
-
-
-    public GameScreen(SlamburgerGame game){
-
+    public GameScreen(final SlamburgerGame game) {
         this.game = game;
-        toppingImg = new Texture(Gdx.files.internal("tomato.png"));
-        bottomBun = new Texture(Gdx.files.internal("bottom.png"));
+        deck = new Deck(50,10);
+
+        img = new Texture("bottom.png");
+        sprite = new Sprite(img);
+
+        // Center the sprite in the top/middle of the screen
+        sprite.setPosition(Gdx.graphics.getWidth() / 2 - sprite.getWidth() / 2,
+                Gdx.graphics.getHeight() / 2);
 
 
 
 
-        deck = new Deck(50, 13);
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 480);
-        camera.position.set(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, 0);
-        camera.update();
-        backgroundCam = new OrthographicCamera();
-        backgroundCam.setToOrtho(false, 800, 480);
-        backgroundCam.position.set(Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2, 0);
-        backgroundCam.update();
-
-        fitViewPort = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
-        backgroundFVP = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), backgroundCam);
-
-
-
-
-        toppings = new ArrayList<Topping>();
-        spawnTopping();
-        burgerSize = 0;
-        player = new Player();
         bmf = new BitmapFont();
         bmf.getData().setScale(5f,5f);
+        bmf.setColor(Color.BLACK);
+        shapeRenderer = new ShapeRenderer();
 
-
-
+        player = new Player();
+        burgerSize = 0;
+        topping = new Topping(false, "monkey.png");
+        /*try{
+            Scanner scanner = new Scanner(new File("highscore.txt"));
+            highScore = scanner.nextInt();
+            scanner.close();
+        }catch(FileNotFoundException e){
+            e.printStackTrace();
+        }*/
 
 
     }
 
-    @Override
-    public void show() {
-
+    private void spawnRaindrop() {
+       /* Rectangle raindrop = new Rectangle();
+        raindrop.x = MathUtils.random(0, 800 - 64);
+        raindrop.y = 480;
+        raindrop.width = 64;
+        raindrop.height = 64;
+        raindrops.add(raindrop);*/
+        lastDropTime = TimeUtils.nanoTime();
     }
 
     @Override
@@ -91,60 +107,54 @@ public class GameScreen implements Screen {
 
 
 
-        Gdx.gl.glClearColor(135/255f, 206/255f, 235/255f, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        // tell the camera to update its matrices.
-        camera.update();
-        backgroundCam.update();
-
-        // tell the SpriteBatch to render in the
-        // coordinate system specified by the camera.
-        game.batch.setProjectionMatrix(backgroundCam.combined);
-        game.batch.begin();
-        bkgrdTexture = new Texture(Gdx.files.internal(backgrounds[backgroundIndex]));
-        game.batch.draw(bkgrdTexture,camera.position.x - (bkgrdTexture.getWidth()/2), camera.position.y - (bkgrdTexture.getHeight()/2));
-        game.batch.end();
-
-        game.batch.setProjectionMatrix(camera.combined);
-
-
-        //background.draw(game.batch);
-
-        game.batch.begin();
-
-        game.batch.draw(bottomBun,camera.position.x - (bottomBun.getWidth()/2), camera.position.y - (bottomBun.getHeight()/2));
-
-        for (Topping topping : toppings) {
-            game.batch.draw(topping.getTexture(), camera.position.x - (toppingImg.getWidth()/2), camera.position.y - (toppingImg.getHeight()/2));
-            top = topping;
-
+        sprite.setPosition(sprite.getX(), sprite.getY()-17);
+        if(sprite.getY() < -600){
+            topping = deck.deal();
+            sprite = new Sprite(topping.getTexture());
+            sprite.setPosition(Gdx.graphics.getWidth() / 2 - sprite.getWidth() / 2,
+                    Gdx.graphics.getHeight() / 2);
+            burgerSize++;
         }
 
-       /* if (top.isToppingBad()){
-            float delay = 1; // seconds
+        if(Gdx.input.justTouched() && !topping.isToppingBad() ){
+            player.addPoints(burgerSize);
+            player.useBun();
+            burgerSize = 0;
+            topping = new Topping(false, "bottom.png");
+            sprite = new Sprite(topping.getTexture());
+            sprite.setPosition(Gdx.graphics.getWidth() / 2 - sprite.getWidth() / 2,
+                    Gdx.graphics.getHeight() / 2);
+        }
+        Gdx.gl.glClearColor(1, 1, 1, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-            Timer.schedule(new Timer.Task(){
-                @Override
-                public void run() {
-                    toppings.clear();
-                }
-            }, delay);
-        }*/
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(Color.RED);
+        shapeRenderer.rect(25, 25, 75, burgerSize*35);
+        shapeRenderer.end();
 
+        game.batch.begin();
 
-        bmf.draw(game.batch, "SCORE: "+ player.getPoints(), 50  , 100);
-        bmf.draw(game.batch, "CARDS LEFT: "+ deck.cardsInDeck(), 50  , 170);
+        game.batch.draw(sprite, sprite.getX(), sprite.getY());
+
+        bmf.draw(game.batch, "SCORE: "+ player.getPoints(),50, Gdx.graphics.getHeight()-120);
         bmf.draw(game.batch, "BUNS LEFT: "+ player.bunLeft(), 50  , Gdx.graphics.getHeight()-50);
+
         game.batch.end();
-        handleInput();
 
 
-        if (TimeUtils.nanoTime()/1000000000 - lastToppingTime > 1)
-
-            spawnTopping();
-        if(!player.hasBuns() || !deck.hasCard()) {
-            float delay = 1; // seconds
+        if(topping.isToppingBad()){
+            burgerSize = 0;
+        }
+        if(!deck.hasCard() || !player.hasBuns()){
+           float delay = 1; // seconds
+            /*try{
+                Writer wr = new FileWriter("highscore.txt");
+                wr.write(Integer.toString(highScore));
+                wr.close();
+            }catch(IOException e){
+                e.printStackTrace();
+            }*/
 
             Timer.schedule(new Timer.Task(){
                 @Override
@@ -152,8 +162,8 @@ public class GameScreen implements Screen {
                     game.setScreen(new MenuScreen(game));
                 }
             }, delay);
-
         }
+
 
 
 
@@ -161,69 +171,30 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-        backgroundFVP.update(width, height, true);
-        backgroundCam.update();
-        fitViewPort.update(width, height, true);
-        camera.update();
-
-    }
-
-    private void spawnTopping() {
-
-    if(top == null || !top.isToppingBad()) {
-        if (deck.hasCard()) {
-            toppings.add(deck.deal());
-            burgerSize++;
-            lastToppingTime = TimeUtils.nanoTime() / 1000000000;
-            backgroundIndex++;
-
-
-        }
-    }else{
-        toppings.clear();
-        top = null;
-        burgerSize = 0;
-        backgroundIndex = 0;
-    }
-
-
-
-
-    }
-    public void handleInput(){
-        if(Gdx.input.justTouched() && !top.isToppingBad() && player.hasBuns()){
-
-            player.addPoints(burgerSize);
-            toppings.clear();
-            burgerSize = 0;
-            backgroundIndex = 0;
-            top = null;
-            player.useBun();
-
-
-
-
-        }
     }
 
     @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
+    public void show() {
+        // start the playback of the background music
+        // when the screen is shown
+        //rainMusic.play();
     }
 
     @Override
     public void hide() {
+    }
 
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
     }
 
     @Override
     public void dispose() {
-        toppingImg.dispose();
 
     }
+
 }

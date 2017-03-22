@@ -10,6 +10,10 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.slamburger.game.SlamburgerGame;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 /**
  * Created by 123 on 3/10/2017.
  */
@@ -20,6 +24,7 @@ public class MenuScreen implements Screen {
     Texture img;
     FitViewport fitViewPort;
     BitmapFont bmf;
+    int highScore = 0;
     public MenuScreen(SlamburgerGame game){
         img = new Texture("tomato.png");
         camera = new OrthographicCamera();
@@ -27,6 +32,15 @@ public class MenuScreen implements Screen {
         fitViewPort = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
         bmf = new BitmapFont();
         this.game = game;
+        /*try{
+            Scanner scanner = new Scanner(new File("highscore.txt"));
+            highScore = scanner.nextInt();
+            scanner.close();
+        }catch(FileNotFoundException e){
+            e.printStackTrace();
+        }*/
+
+
     }
     @Override
     public void show() {
@@ -35,25 +49,26 @@ public class MenuScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(0, 0, 0.2f, 1);
+        Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         camera.update();
         game.batch.setProjectionMatrix(camera.combined);
-        //game.batch.enableBlending();
+
         bmf.getData().setScale(5f,5f);
         game.batch.begin();
-        //game.batch.draw(img, camera.position.x - (img.getWidth()/2), camera.position.y - (img.getHeight()/2));
-        bmf.draw(game.batch, "MAIN MENU", 100, 100);
+
+         bmf.draw(game.batch, "TAP TO START", Gdx.graphics.getWidth()+50, Gdx.graphics.getHeight()/2);
+         bmf.draw(game.batch, "HIGHSCORE: "+highScore, Gdx.graphics.getWidth()+50, Gdx.graphics.getHeight()/2-50);
 
 
 
         if (Gdx.input.justTouched()) {
-            //if(Gdx.input.getX() <100 && Gdx.input.getY() <100){
-            bmf.draw(game.batch, "STARTING...", 100, 100);
-                game.setScreen(new GameScreen(game));
-                dispose();
-           // }
+
+
+            game.setScreen(new GameScreen(game));
+            dispose();
+
 
 
 
