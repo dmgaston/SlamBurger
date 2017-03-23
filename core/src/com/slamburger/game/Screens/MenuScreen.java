@@ -40,6 +40,7 @@ public class MenuScreen implements Screen {
         bmf.getData().setScale(5f,5f);
         this.game = game;
         background = new Texture(Gdx.files.internal("chimp.png"));
+        /*get the saved high score*/
         preferencesLoader = new PreferencesLoader();
         highScore = preferencesLoader.getHighScore();
 
@@ -62,13 +63,15 @@ public class MenuScreen implements Screen {
 
         game.batch.begin();
         game.batch.draw(background, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
+        /*write the words sort of in the middle, will switch to labels and buttons on a table
+        * in the future*/
          bmf.draw(game.batch, "TAP TO START", 100, Gdx.graphics.getHeight()/2);
          bmf.draw(game.batch, "HIGHSCORE: "+highScore, 100, Gdx.graphics.getHeight()/2-70);
 
 
 
         if (Gdx.input.justTouched()) {
-
+            /*if screen is touched, switch to the game screen*/
 
             game.setScreen(new GameScreen(game));
             dispose();

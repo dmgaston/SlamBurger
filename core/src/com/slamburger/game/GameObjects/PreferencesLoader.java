@@ -11,7 +11,7 @@ public class PreferencesLoader {
     Preferences prefs;
 
     public PreferencesLoader(){
-
+        /*get or create new preferences*/
         prefs = Gdx.app.getPreferences("SlamBurger");
         if (!prefs.contains("highScore")) {
             prefs.putInteger("highScore", 0);

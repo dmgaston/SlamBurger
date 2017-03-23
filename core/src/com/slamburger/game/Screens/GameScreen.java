@@ -54,7 +54,7 @@ public class GameScreen implements Screen {
     ShapeRenderer shapeRenderer;
     PreferencesLoader preferencesLoader;
 
-    long lastDropTime;
+    
     int burgerSize;
 
     Topping topping;
@@ -62,8 +62,9 @@ public class GameScreen implements Screen {
 
     public GameScreen(final SlamburgerGame game) {
         this.game = game;
+        /*deck with x cards, y percent of which are bad*/
         deck = new Deck(50,10);
-
+        /*first sprite that falls will be this image*/
         img = new Texture("bottom.png");
         sprite = new Sprite(img);
 
@@ -77,11 +78,14 @@ public class GameScreen implements Screen {
         bmf = new BitmapFont();
         bmf.getData().setScale(5f,5f);
         bmf.setColor(Color.BLACK);
+        /*this is for the "size meter"*/
         shapeRenderer = new ShapeRenderer();
 
         player = new Player();
         burgerSize = 0;
+        /*topping is initialized with arbitrary values, it will be changed later*/
         topping = new Topping(false, "monkey.png");
+        /*get the high score*/
         preferencesLoader = new PreferencesLoader();
         highScore = preferencesLoader.getHighScore();
 
@@ -94,8 +98,10 @@ public class GameScreen implements Screen {
     public void render(float delta) {
 
 
-
+        /*move the sprite down 17 each render*/
         sprite.setPosition(sprite.getX(), sprite.getY()-17);
+        /*if the sprite is below the screen, deal a new card and set sprite to the
+        * texture of that topping*/
         if(sprite.getY() < -600){
             topping = deck.deal();
             sprite = new Sprite(topping.getTexture());
@@ -103,11 +109,13 @@ public class GameScreen implements Screen {
                     Gdx.graphics.getHeight() / 2);
             burgerSize++;
         }
-
+            /*makes sure player can't take burger while a bad topping is on screen*/
         if(Gdx.input.justTouched() && !topping.isToppingBad() ){
+            /*player takes burger, uses bun, then the size is reset*/
             player.addPoints(burgerSize);
             player.useBun();
             burgerSize = 0;
+            /*the bottom bun image will fall when user takes a burger*/
             topping = new Topping(false, "bottom.png");
             sprite = new Sprite(topping.getTexture());
             sprite.setPosition(Gdx.graphics.getWidth() / 2 - sprite.getWidth() / 2,
@@ -115,7 +123,8 @@ public class GameScreen implements Screen {
         }
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
+        /*draw the size meter, in the bottom left corner with a width of 75 and a height
+        * determinted by burgersize*/
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(Color.RED);
         shapeRenderer.rect(25, 25, 75, burgerSize*35);
@@ -124,22 +133,25 @@ public class GameScreen implements Screen {
         game.batch.begin();
 
         game.batch.draw(sprite, sprite.getX(), sprite.getY());
-
+        /*draw our text*/
         bmf.draw(game.batch, "SCORE: "+ player.getPoints(),50, Gdx.graphics.getHeight()-120);
         bmf.draw(game.batch, "BUNS LEFT: "+ player.bunLeft(), 50  , Gdx.graphics.getHeight()-50);
 
         game.batch.end();
 
-
+        /*if the topping's bad, reset the burger size*/
         if(topping.isToppingBad()){
             burgerSize = 0;
         }
+        /*if there are no cards, or the player has no buns, go back to the main menu screen*/
         if(!deck.hasCard() || !player.hasBuns()){
            float delay = 1; // seconds
+            /*if we have a high score, set it in the preferences*/
            if(player.getPoints()> highScore){
                 preferencesLoader.setHighScore(player.getPoints());
            }
 
+            /*wait one second before switching screens so the change isn't so abrupt*/
             Timer.schedule(new Timer.Task(){
                 @Override
                 public void run() {

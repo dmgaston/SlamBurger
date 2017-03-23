@@ -8,7 +8,8 @@ import com.badlogic.gdx.graphics.Texture;
  */
 
 public class Topping {
-
+   /* This class is used to load a texture from the image passed to it. It lets us know if the topping is bad so
+    * we can reset the burger */
     final private boolean isBad;
     final private String imageFileName;
     Texture texture;

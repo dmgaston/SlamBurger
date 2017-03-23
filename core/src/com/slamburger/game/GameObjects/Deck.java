@@ -8,93 +8,34 @@ public class Deck {
 
     int size;
     int percentBad;
-    public Topping cards[];
+
     int dealIndex = 0;
-    int badCardPicker;
+
     int cardPicker;
-    int swapIndex;
+
     Topping topping;
     Random rand;
+    int cardsDealt;
     public Deck(int size, int percentBad){
         this.size = size;
         this.percentBad = percentBad;
-        cards = new Topping[size];
+
+        /*topping gets initialized with arbitrary values; they will be changed when we deal*/
         topping = new Topping(true, "monkey.png");
         rand = new Random();
-        //cards[0] = topping;
-        /*for(int i = 0; i < size-1; i++){
-            topping = new Topping(false, "tomato.png");
-            cards[i] = topping;
-        }*/
-        /*for(int i = 0; i < badCardsInDeck; i++ ){
-            badCardPicker = rand.nextInt(4);
-
-            switch (badCardPicker){
-                case 0:
-                topping = new Topping(true, "biohazard.png");
-                    break;
-                case 1:
-                    topping = new Topping(true, "monkey.png");
-                    break;
-                case 2:
-                    topping = new Topping(true, "monkey.png");
-                    break;
-                case 3:
-                    topping = new Topping(true, "biohazard.png");
-                    break;
-                case 4:
-                    topping = new Topping(true, "biohazard.png");
-                    break;
-            }
-
-
-            cards[i] = topping;
-
-        }*/
-        /*for (int j =0; j < size; j ++){
-
-                cardPicker = rand.nextInt(4);
-                switch(cardPicker){
-                    case 0:
-                        topping = new Topping(false, "lettuce.png");
-                        break;
-                    case 1:
-                        topping = new Topping(true, "biohazard.png");
-                        break;
-                    case 2:
-                        topping = new Topping(false, "pickle.png");
-                        break;
-                    case 3:
-                        topping = new Topping(false, "monkey.png");
-                        break;
-                    case 4:
-                        topping = new Topping(false, "tomato.png");
-                        break;
-                }
-                cards[j] = topping;
-
-
-        }
-        shuffle();*/
-
+        cardsDealt = 0;
 
     }
 
 
-    /* public void shuffle(){
 
-         Topping temp;
-         for(int i = 0; i < size; i++){
-             temp=cards[i];
-             swapIndex = rand.nextInt(size);
-             cards[i] = cards[swapIndex];
-             cards[swapIndex] = temp;
-         }
-     }*/
     public Topping deal(){
 
         int randNum = rand.nextInt(100)+1;
+      /*  Picks a random number up to 100, if lower than percentBad, we pick a bad card,
+      * if higher, we pick a good card*/
         if(randNum < percentBad){
+            /*Randomly pick one of the bad cards we have in the assets folder*/
             cardPicker = rand.nextInt(4)+1;
             switch(cardPicker){
                 case 0:
@@ -114,6 +55,7 @@ public class Deck {
                     break;
             }
         }else{
+            /*Pick a good card*/
             cardPicker = rand.nextInt(4)+1;
             switch(cardPicker){
                 case 0:
@@ -133,15 +75,16 @@ public class Deck {
                     break;
             }
         }
-
+        cardsDealt++;
         return topping;
     }
     public boolean hasCard(){
         if(dealIndex < size) return true;
         return false;
     }
+    /*this may be used for an on screen counter later*/
     public int cardsInDeck(){
-        return size - dealIndex+1;
+        return size -cardsDealt;
     }
 
 }
