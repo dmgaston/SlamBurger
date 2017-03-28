@@ -65,8 +65,9 @@ public class MenuScreen implements Screen {
         game.batch.draw(background, Gdx.graphics.getWidth()/2, Gdx.graphics.getHeight()/2);
         /*write the words sort of in the middle, will switch to labels and buttons on a table
         * in the future*/
-         bmf.draw(game.batch, "TAP TO START", 100, Gdx.graphics.getHeight()/2);
-         bmf.draw(game.batch, "HIGHSCORE: "+highScore, 100, Gdx.graphics.getHeight()/2-70);
+        bmf.draw(game.batch, "TAP TO START", 275, Gdx.graphics.getHeight()/2);
+        bmf.draw(game.batch, "SlamBurger", 340, Gdx.graphics.getHeight()/1-190);
+        bmf.draw(game.batch, "HIGHSCORE: "+highScore, 269, Gdx.graphics.getHeight()/2-70);
 
 
 
